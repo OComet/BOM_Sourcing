@@ -563,11 +563,11 @@ tr:hover td { background: var(--surface2); }
       <p class="hint">Remplace l'appel Claude direct côté navigateur : codification IPN + vérification croisée Digikey/Mouser/Gemini gérées par N8N.</p>
     </div>
 
-    <div class="card" style="margin-bottom:16px;">
-      <div class="setup-card-title" style="margin-bottom:10px"><i class="ti ti-table" aria-hidden="true"></i> Apps Script écriture GSheet achat <span class="fixed-tag">optionnel</span></div>
-      <label>URL Apps Script writer</label>
-      <input type="text" id="setup-writer-url" value="https://script.google.com/macros/s/AKfycbxHOVSS4nDASlpYPFvjW8ZkNH2inWCG5VO9HoeTILx2R9f-aOi0Wf62JVWW7ZIfm-U_fQ/exec" />
-      <p class="hint">Permet d'écrire directement dans la GSheet achat après analyse. Déployez <code>write_sheet_script.js</code> une seule fois.</p>
+    <div class="card" style="margin-bottom:16px; border:1.5px solid #97C459; background:var(--green-bg);">
+      <div class="setup-card-title" style="margin-bottom:10px"><i class="ti ti-table" aria-hidden="true" style="color:var(--green)"></i> <span style="color:var(--green)">Webhook N8N — Écriture GSheet achat</span> <span class="fixed-tag">obligatoire pour écrire</span></div>
+      <label>URL du webhook (Production)</label>
+      <input type="text" id="setup-writer-url" value="https://protoprocess.app.n8n.cloud/webhook/achats-ecriture-gsheet" />
+      <p class="hint">Remplace le writer Apps Script + proxy Cloudflare : recherche le fichier GSheet achat par N° SO dans Drive, vide puis écrit les lignes. <strong>Le champ N° SO devient obligatoire</strong> — la recherche se fait uniquement par SO (plus par client+carte).</p>
     </div>
 
     <div class="card" style="margin-bottom:16px;">
@@ -705,8 +705,8 @@ tr:hover td { background: var(--surface2); }
             <div style="font-size:11px; color:var(--green); opacity:0.8;">Le dossier Drive sera recherché automatiquement par SO + référence</div>
           </div>
           <div style="display:flex; gap:8px; align-items:center; flex-shrink:0;">
-            <label style="font-size:12px; color:var(--green); white-space:nowrap; margin:0; font-weight:600;">N° SO <span style="font-weight:400;opacity:0.7">(optionnel)</span></label>
-            <input type="text" id="so-reference" placeholder="ex: 2605-254 (si ambigu)"
+            <label style="font-size:12px; color:var(--green); white-space:nowrap; margin:0; font-weight:600;">N° SO <span style="font-weight:400;opacity:0.7">(obligatoire)</span></label>
+            <input type="text" id="so-reference" placeholder="ex: SO2607-666" required
               style="width:130px; border-color:#97C459; background:white; padding:6px 10px; font-size:13px; border-radius:6px; border:1px solid #97C459;" />
           </div>
           <button class="btn" onclick="writeToGSheet()" style="background:var(--green); color:white; border-color:transparent; flex-shrink:0;">
@@ -1139,7 +1139,7 @@ async function loadAll() {
   mouserKey = document.getElementById("setup-mouser-key")?.value.trim() || "";
   farnellKey = document.getElementById("setup-farnell-key")?.value.trim() || "";
   proxyUrl = document.getElementById("setup-proxy-url").value.trim();
-  writerUrl = document.getElementById("setup-writer-url")?.value.trim() || "https://script.google.com/macros/s/AKfycbxHOVSS4nDASlpYPFvjW8ZkNH2inWCG5VO9HoeTILx2R9f-aOi0Wf62JVWW7ZIfm-U_fQ/exec";
+  writerUrl = document.getElementById("setup-writer-url")?.value.trim() || "https://protoprocess.app.n8n.cloud/webhook/achats-ecriture-gsheet";
   webhookUrl = document.getElementById("setup-webhook-url").value.trim();
   const rulesUrl = document.getElementById("setup-rules-url").value.trim();
   if (!webhookUrl) {
@@ -1928,17 +1928,19 @@ async function writeToGSheet() {
   const statusEl = document.getElementById('gsheet-write-status');
 
   if (!writerUrl) {
-    statusEl.innerHTML = '<span style="color:var(--red)">URL Apps Script writer non configurée dans le Setup</span>';
+    statusEl.innerHTML = '<span style="color:var(--red)">URL du webhook N8N non configurée dans le Setup</span>';
+    return;
+  }
+  if (!so) {
+    statusEl.innerHTML = '<span style="color:var(--red)">N° SO obligatoire — la recherche du fichier se fait uniquement par SO côté N8N</span>';
     return;
   }
 
-  // Get ref from parsed filename
+  // Get ref from parsed filename (sert de départage si plusieurs fichiers matchent le même SO)
   const fileInput = document.getElementById('bom-file-input');
   const filename = fileInput?.files?.[0]?.name || '';
   const parsed = parseLuminovoFilename(filename);
   const ref = parsed?.ref || '';
-
-  // SO is optional — search by client+carte first
 
   statusEl.innerHTML = '<div class="spinner" style="width:13px;height:13px;border-width:2px;display:inline-block;vertical-align:middle"></div> Recherche de la GSheet dans Drive…';
 
@@ -1950,9 +1952,7 @@ async function writeToGSheet() {
     }
   });
 
-  // Stock : cible explicitement la clé canonique 'Reçus', jamais une clé de repli créée à la volée
-  // (l'ancien fallback 'Stock' pouvait atterrir n'importe où dans l'objet et décaler la sérialisation
-  // positionnelle attendue par le writer Apps Script — corrigé le 20/07, voir ACHATS_COLUMNS ci-dessous)
+  // Stock : cible explicitement la clé canonique 'Reçus'
   bomData.forEach(row => {
     const ipn = (row['Approved internal part number']||row['IPN']||row['ipn']||'').trim().toUpperCase();
     const mpn = (row['MPN']||row['mpn']||'').trim().toUpperCase();
@@ -1960,20 +1960,16 @@ async function writeToGSheet() {
     row['Reçus'] = si.qty !== null ? String(si.qty) : '';
   });
 
-  // Injecter les points de vigilance qualité (Gemini + catégories Claude) dans la colonne Notes,
-  // en liste à puce, en remplacement de l'annotation valeur/spec d'origine devenue redondante
-  // une fois la codification faite. Le writer Apps Script ne touche jamais cette colonne (confirmé).
+  // Injecter les points de vigilance qualité (Gemini + catégories Claude) dans la colonne Notes
   bomData.forEach((row, i) => {
     const issues = (rowMeta[i] && rowMeta[i].qc_issues) || [];
     row['Notes'] = issues.length ? issues.map(q => '• ' + q).join('\n') : '';
   });
 
-  // Sérialisation positionnelle fixe A→S (20/07) : le writer Apps Script lit les colonnes par
-  // position (index fixe), pas par nom. Object.keys(bomData[0]) reflète l'ordre d'insertion des
-  // propriétés JS, pas l'ordre A→S — une seule clé mal nommée ou ajoutée en cours de route décale
-  // silencieusement tout ce qui suit. On construit donc explicitement les 19 colonnes attendues,
-  // en allant chercher chaque valeur par son nom (tolérant à la casse/aux espaces), quel que soit
-  // l'ordre ou les propriétés supplémentaires présentes dans bomData.
+  // 19 colonnes A→S envoyées PAR NOM (objets, pas tableaux positionnels) — le pipeline N8N
+  // (Split Out + nœuds Code) lit ces valeurs via rows[i][nomColonne], indépendamment de
+  // l'ordre JS. Ne pas revenir à un format de tableau positionnel : c'était le format attendu
+  // par l'ancien writer Apps Script, plus par le webhook N8N.
   const ACHATS_COLUMNS = [
     'Supplier','Supplier part number','Approved internal part number','Aggregated qty','Scrap qty',
     'MOQ','Package','Unit price','Purchase qty','Purchase price','MPN','Designator','Approved parts',
@@ -1985,71 +1981,65 @@ async function writeToGSheet() {
     return found ? row[found] : '';
   }
   const headers = ACHATS_COLUMNS;
-  const rows = bomData.map(r => ACHATS_COLUMNS.map(c => String(getColValue(r, c) || '')));
+  const rowsPayload = bomData.map(r => {
+    const obj = {};
+    ACHATS_COLUMNS.forEach(c => { obj[c] = String(getColValue(r, c) || ''); });
+    return obj;
+  });
+
+  // Build warnings summary from rowMeta
+  const warningsSummary = { sensor:[], battery:[], 'not-sealed':[], 'msl4+':[], error:[], uncodified:[] };
+  if (rowMeta && rowMeta.length) {
+    rowMeta.forEach((meta, i) => {
+      const row = bomData[i] || {};
+      const ref2 = findCol(row, ['designator','reference','ref']) || '';
+      (meta.warnings||[]).forEach(w => { if (warningsSummary[w]) warningsSummary[w].push(ref2); });
+      if (meta.mpnWarn) warningsSummary.error.push(ref2);
+      if (meta.status === 'error') warningsSummary.error.push(ref2);
+    });
+    document.querySelectorAll('.editable-ipn').forEach((inp, i) => {
+      if (inp.value === '—' || inp.value === '') {
+        const row = bomData[i] || {};
+        warningsSummary.uncodified.push(findCol(row, ['designator','reference','ref']) || '');
+      }
+    });
+  }
+
+  statusEl.innerHTML = '<div class="spinner" style="width:13px;height:13px;border-width:2px;display:inline-block;vertical-align:middle"></div> Écriture en cours…';
 
   try {
-    // Apps Script blocks CORS preflight on POST
-    // Solution: send metadata via GET, data chunked to avoid URL limits
-    // For small BOM: use GET with JSON encoded params
-    const meta = {
-      so, ref,
-      client: parsed?.client||'',
-      carte: parsed?.carte||''
-    };
-
-    // POST via Cloudflare Worker — pas de CORS, pas de limite de taille
-    const px = proxyUrl;
-    if (!px) { statusEl.innerHTML = '<span style="color:var(--red)">Proxy non configuré</span>'; return; }
-
-    statusEl.innerHTML = '<div class="spinner" style="width:13px;height:13px;border-width:2px;display:inline-block;vertical-align:middle"></div> Écriture en cours…';
-
-    // Build warnings summary from rowMeta
-    const warningsSummary = { sensor:[], battery:[], 'not-sealed':[], 'msl4+':[], error:[], uncodified:[] };
-    if (rowMeta && rowMeta.length) {
-      rowMeta.forEach((meta, i) => {
-        const row = bomData[i] || {};
-        const ref2 = findCol(row, ['designator','reference','ref']) || '';
-        (meta.warnings||[]).forEach(w => { if (warningsSummary[w]) warningsSummary[w].push(ref2); });
-        if (meta.mpnWarn) warningsSummary.error.push(ref2);
-        if (meta.status === 'error') warningsSummary.error.push(ref2);
-      });
-      document.querySelectorAll('.editable-ipn').forEach((inp, i) => {
-        if (inp.value === '—' || inp.value === '') {
-          const row = bomData[i] || {};
-          warningsSummary.uncodified.push(findCol(row, ['designator','reference','ref']) || '');
-        }
-      });
-    }
-
-    const resp = await fetch(px, {
+    // Appel direct au webhook N8N — plus de proxy Cloudflare Worker pour ce flux
+    // (N8N gère nativement le CORS pour les requêtes cross-origin depuis GitHub Pages).
+    const resp = await fetch(writerUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        action: 'write',
-        writerUrl: writerUrl,
         so, ref,
-        client: meta.client,
-        carte: meta.carte,
-        headers, rows,
+        client: parsed?.client || '',
+        carte: parsed?.carte || '',
+        headers, rows: rowsPayload,
         warnings: warningsSummary
       })
     });
     const text = await resp.text();
     let result;
     try { result = JSON.parse(text); }
-    catch(e) { result = { success: false, error: 'Réponse invalide: ' + text.slice(0,100) }; }
+    catch(e) { result = { success: false, reason: 'invalid_response', detail: text.slice(0,150) }; }
+
     if (result.success) {
       statusEl.innerHTML = '<span style="color:var(--green)"><i class="ti ti-check"></i> ' +
-        result.rows + ' lignes écrites dans "' + result.sheetName + '"' +
-        (result.matchedBy ? ' <span style="font-size:11px;opacity:0.8">(trouvée par ' + result.matchedBy + ')</span>' : '') +
-        ' — <a href="' + result.sheetUrl + '" target="_blank" style="color:var(--green);font-weight:600">Ouvrir</a></span>';
+        (result.lignes_ecrites ?? '?') + ' ligne(s) écrite(s) dans "' + (result.fileName || so) + '"' +
+        ' — <a href="' + result.fileUrl + '" target="_blank" style="color:var(--green);font-weight:600">Ouvrir</a></span>';
+    } else if (result.reason === 'not_found') {
+      statusEl.innerHTML = '<span style="color:var(--red)">Aucune GSheet trouvée pour le SO "' + so + '"</span>';
+    } else if (result.reason === 'ambiguous') {
+      const names = Array.isArray(result.detail) ? result.detail.map(c => c.name).filter(Boolean) : [];
+      statusEl.innerHTML =
+        '<span style="color:var(--red)">Plusieurs fichiers correspondent au SO "' + so + '"</span>' +
+        (names.length ? '<br><span style="font-size:11px;color:var(--amber)">' + names.join(' | ') + '</span>' : '') +
+        '<br><span style="font-size:11px;color:var(--text2)">Ajoutez une référence plus précise dans le nom de fichier Luminovo, ou renommez le doublon dans Drive</span>';
     } else {
-      let msg = '<span style="color:var(--red)">Introuvable : ' + result.error + '</span>';
-      if (result.candidates && result.candidates.length) {
-        msg += '<br><span style="font-size:11px;color:var(--amber)">GSheets trouvées : ' + result.candidates.join(' | ') + '</span>';
-        msg += '<br><span style="font-size:11px;color:var(--text2)">Saisissez le N° SO pour discriminer</span>';
-      }
-      statusEl.innerHTML = msg;
+      statusEl.innerHTML = '<span style="color:var(--red)">Erreur : ' + (result.reason || result.detail || 'réponse inattendue') + '</span>';
     }
   } catch(e) {
     statusEl.innerHTML = '<span style="color:var(--red)">Erreur connexion : ' + e.message + '</span>';
