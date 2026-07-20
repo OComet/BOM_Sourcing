@@ -1950,27 +1950,42 @@ async function writeToGSheet() {
     }
   });
 
-  // Add/update Stock column
-  const headers0 = Object.keys(bomData[0]);
-  const stockColKey = headers0.find(k=>k.toLowerCase().includes('reçus')||k.toLowerCase().includes('recus')) || 'Stock';
+  // Stock : cible explicitement la clé canonique 'Reçus', jamais une clé de repli créée à la volée
+  // (l'ancien fallback 'Stock' pouvait atterrir n'importe où dans l'objet et décaler la sérialisation
+  // positionnelle attendue par le writer Apps Script — corrigé le 20/07, voir ACHATS_COLUMNS ci-dessous)
   bomData.forEach(row => {
-    const ipn = (row['Approved internal part number']||row['IPN']||'').trim().toUpperCase();
-    const mpn = (row['MPN']||'').trim().toUpperCase();
+    const ipn = (row['Approved internal part number']||row['IPN']||row['ipn']||'').trim().toUpperCase();
+    const mpn = (row['MPN']||row['mpn']||'').trim().toUpperCase();
     const si = getStockInfo(ipn, mpn, row['Manufacturer free']||'');
-    row[stockColKey] = si.qty !== null ? String(si.qty) : '';
+    row['Reçus'] = si.qty !== null ? String(si.qty) : '';
   });
 
   // Injecter les points de vigilance qualité (Gemini + catégories Claude) dans la colonne Notes,
   // en liste à puce, en remplacement de l'annotation valeur/spec d'origine devenue redondante
   // une fois la codification faite. Le writer Apps Script ne touche jamais cette colonne (confirmé).
-  const notesKey = Object.keys(bomData[0]).find(k => k.toLowerCase().trim() === 'notes') || 'Notes';
   bomData.forEach((row, i) => {
     const issues = (rowMeta[i] && rowMeta[i].qc_issues) || [];
-    row[notesKey] = issues.length ? issues.map(q => '• ' + q).join('\n') : '';
+    row['Notes'] = issues.length ? issues.map(q => '• ' + q).join('\n') : '';
   });
 
-  const headers = Object.keys(bomData[0]);
-  const rows = bomData.map(r => headers.map(h => String(r[h]||'')));
+  // Sérialisation positionnelle fixe A→S (20/07) : le writer Apps Script lit les colonnes par
+  // position (index fixe), pas par nom. Object.keys(bomData[0]) reflète l'ordre d'insertion des
+  // propriétés JS, pas l'ordre A→S — une seule clé mal nommée ou ajoutée en cours de route décale
+  // silencieusement tout ce qui suit. On construit donc explicitement les 19 colonnes attendues,
+  // en allant chercher chaque valeur par son nom (tolérant à la casse/aux espaces), quel que soit
+  // l'ordre ou les propriétés supplémentaires présentes dans bomData.
+  const ACHATS_COLUMNS = [
+    'Supplier','Supplier part number','Approved internal part number','Aggregated qty','Scrap qty',
+    'MOQ','Package','Unit price','Purchase qty','Purchase price','MPN','Designator','Approved parts',
+    'Mounting','Notes','Manufacturer free','Reçus','Manquant','Stock PP'
+  ];
+  function getColValue(row, colName) {
+    if (row[colName] !== undefined) return row[colName];
+    const found = Object.keys(row).find(k => k.toLowerCase().trim() === colName.toLowerCase().trim());
+    return found ? row[found] : '';
+  }
+  const headers = ACHATS_COLUMNS;
+  const rows = bomData.map(r => ACHATS_COLUMNS.map(c => String(getColValue(r, c) || '')));
 
   try {
     // Apps Script blocks CORS preflight on POST
