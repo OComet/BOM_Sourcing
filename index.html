@@ -94,7 +94,7 @@ header {
 .chip.ok { border-color: #97C459; color: var(--green-badge); background: var(--green-bg); }
 .chip.err { border-color: #F09595; color: var(--red-badge); background: var(--red-bg); }
 
-.main { max-width: 1100px; margin: 0 auto; padding: 2rem; }
+.main { max-width: min(96vw, 1800px); margin: 0 auto; padding: 2rem; }
 
 /* SETUP */
 .setup-screen { display: block; }
@@ -363,6 +363,7 @@ textarea {
 .filter-btn.active.f-sealed { background: #5B6FBE; }
 .filter-btn.active.f-msl { background: #5B6FBE; }
 .filter-btn.active.f-fuzzystock { background: #5B6FBE; }
+.filter-btn.active.f-partialstock { background: var(--pp-blue); color:#0a0c12; }
 .filter-count {
   font-size: 11px;
   padding: 1px 6px;
@@ -503,7 +504,8 @@ tr:hover td { background: var(--surface2); }
   border: 1px solid var(--border2);
   border-radius: var(--radius);
   box-shadow: 0 6px 16px rgba(0,0,0,0.12);
-  min-width: 150px;
+  min-width: 260px;
+  max-width: 360px;
   padding: 4px;
   margin-top: 2px;
 }
@@ -511,16 +513,16 @@ tr:hover td { background: var(--surface2); }
 .fuzzy-cand {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
-  padding: 5px 7px;
+  padding: 6px 8px;
   border-radius: 5px;
   cursor: pointer;
   font-size: 11px;
 }
 .fuzzy-cand:hover { background: var(--blue-bg); }
-.fuzzy-key { font-family: var(--mono); color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; }
-.fuzzy-qty { font-family: var(--mono); font-weight: 600; color: var(--text2); flex-shrink: 0; }
+.fuzzy-key { font-family: var(--mono); color: var(--text); white-space: normal; word-break: break-word; line-height: 1.4; }
+.fuzzy-qty { font-family: var(--mono); font-weight: 600; color: var(--text2); flex-shrink: 0; margin-top: 1px; }
 
 /* CODIF */
 .ipn-result-card {
@@ -699,6 +701,7 @@ tr:hover td { background: var(--surface2); }
 
     <!-- BOM TAB -->
     <div class="panel active" id="tab-bom">
+      <div id="bom-import-zone">
       <!-- BOM SOURCE: Upload ou URL ou paste -->
       <div class="card" style="margin-bottom:12px;">
         <div style="display:flex; gap:8px; align-items:center; margin-bottom:10px; flex-wrap:wrap;">
@@ -754,6 +757,14 @@ tr:hover td { background: var(--surface2); }
         <div id="client-badge"></div>
         <span id="client-note-text" style="font-size:12px; color:var(--text2); font-style:italic;"></span>
       </div>
+      </div>
+
+      <!-- Résumé compact affiché une fois la BOM analysée, remplace la zone d'import ci-dessus -->
+      <div id="bom-import-summary" style="display:none; margin-bottom:12px; padding:9px 14px; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-lg); align-items:center; gap:10px; flex-wrap:wrap;">
+        <i class="ti ti-file-check" style="color:var(--text2); font-size:15px;" aria-hidden="true"></i>
+        <span id="bom-import-summary-text" style="font-size:12px; color:var(--text2); flex:1;"></span>
+        <button class="btn sm" onclick="expandImportZone()"><i class="ti ti-edit" aria-hidden="true"></i> Modifier</button>
+      </div>
 
       <!-- GSheet achat writer bar -->
       <div id="gsheet-write-bar" style="display:none; margin-bottom:10px;">
@@ -795,6 +806,7 @@ tr:hover td { background: var(--surface2); }
           <button class="filter-btn f-warn" onclick="setFilter('warn',this)"><i class="ti ti-alert-triangle" aria-hidden="true"></i> Warnings <span class="filter-count" id="fc-warn">0</span></button>
           <button class="filter-btn f-mpn" onclick="setFilter('mpn',this)"><i class="ti ti-lock" aria-hidden="true"></i> MPN strict <span class="filter-count" id="fc-mpn">0</span></button>
           <button class="filter-btn f-fuzzystock" onclick="setFilter('fuzzy-stock',this)"><i class="ti ti-help-circle" aria-hidden="true"></i> Stock potentiel <span class="filter-count" id="fc-fuzzystock">0</span></button>
+          <button class="filter-btn f-partialstock" onclick="setFilter('partial-stock',this)"><i class="ti ti-split" aria-hidden="true"></i> Stock partiel <span class="filter-count" id="fc-partialstock">0</span></button>
           <div class="filter-sep"></div>
           <button class="filter-btn f-sensor" onclick="setFilter('sensor',this)"><i class="ti ti-radar" aria-hidden="true"></i> Capteurs <span class="filter-count" id="fc-sensor">0</span></button>
           <button class="filter-btn f-battery" onclick="setFilter('battery',this)"><i class="ti ti-battery" aria-hidden="true"></i> Batteries <span class="filter-count" id="fc-battery">0</span></button>
@@ -809,9 +821,9 @@ tr:hover td { background: var(--surface2); }
                 <th style="width:90px">Réf.</th>
                 <th style="width:130px">MPN</th>
                 <th style="width:155px">IPN (éditable)</th>
-                <th>Notes / Description</th>
-                <th style="width:92px">Alertes</th>
                 <th style="width:105px">Stock</th>
+                <th style="width:92px">Alertes</th>
+                <th>Notes / Description</th>
               </tr>
             </thead>
             <tbody id="bom-tbody"></tbody>
@@ -1550,6 +1562,14 @@ function getStockInfo(ipn, mpn, manufacturerFree) {
 // MATCHING FLOU DU STOCK — Phase A (suggestions, jamais d'écriture
 // dans le fichier stock lui-même ; adoption valable pour la session).
 // ============================================================
+
+// Seuil minimal de similarité (0 à 1) en dessous duquel une correspondance n'est même pas
+// proposée. Volontairement strict : mieux vaut rater une suggestion correcte de temps en temps
+// que noyer l'utilisateur sous des propositions peu pertinentes (retour terrain du 23/07 : 17
+// suggestions sur une petite BOM, beaucoup trop). À remonter encore si ça reste trop permissif,
+// à redescendre si les vraies correspondances (fautes de frappe) commencent à disparaître.
+const FUZZY_MIN_SCORE = 0.82;
+
 function levenshtein(a, b) {
   a = a || ''; b = b || '';
   const m = a.length, n = b.length;
@@ -1591,8 +1611,9 @@ function fuzzyScore(a, b) {
   return 1 - levenshtein(na, nb) / maxLen;
 }
 
-// Renvoie toujours jusqu'à `limit` candidats (les meilleurs trouvés), même approximatifs —
-// à l'utilisateur de juger. N'inclut pas les correspondances exactes (déjà gérées ailleurs).
+// Ne renvoie que les candidats qui franchissent FUZZY_MIN_SCORE, jusqu'à `limit` — peut
+// renvoyer 0 candidat si rien n'est assez proche. N'inclut pas les correspondances exactes
+// (déjà gérées ailleurs).
 function findFuzzyStockCandidates(searchKey, limit) {
   if (!searchKey) return [];
   const seen = new Set();
@@ -1602,6 +1623,7 @@ function findFuzzyStockCandidates(searchKey, limit) {
   candidates.sort((a,b)=>b.score-a.score);
   const out = [];
   for (const c of candidates) {
+    if (c.score < FUZZY_MIN_SCORE) break; // trié décroissant : rien d'intéressant après
     const dk = c.key+'|'+c.qty;
     if (seen.has(dk)) continue;
     seen.add(dk);
@@ -1673,6 +1695,31 @@ function renderStockCell(si, idx, purchaseQty) {
 // ============================================================
 // ANALYSE BOM — via webhook N8N (codification + vérification qualité)
 // ============================================================
+// ============================================================
+// REPLI DE LA ZONE D'IMPORT — une fois la BOM analysée, la zone de chargement
+// (source, onglet, client) cède la place à un résumé compact d'une ligne, pour laisser
+// le maximum de hauteur au tableau de résultats (retour terrain du 23/07).
+// ============================================================
+function collapseImportZone(summaryText) {
+  const zone = document.getElementById('bom-import-zone');
+  const summary = document.getElementById('bom-import-summary');
+  if (zone) zone.style.display = 'none';
+  if (summary) {
+    document.getElementById('bom-import-summary-text').textContent = summaryText;
+    summary.style.display = 'flex';
+  }
+}
+
+function expandImportZone() {
+  const zone = document.getElementById('bom-import-zone');
+  const summary = document.getElementById('bom-import-summary');
+  if (zone) zone.style.display = '';
+  if (summary) summary.style.display = 'none';
+}
+// ============================================================
+// FIN REPLI ZONE D'IMPORT
+// ============================================================
+
 async function analyzeBOM() {
   const csvText = csvBuffer.trim();
   if (!csvText) { alert("Chargez une BOM ou collez des données CSV."); return; }
@@ -1731,6 +1778,8 @@ async function analyzeBOM() {
   const fileInput = document.getElementById('bom-file-input');
   const filename = fileInput?.files?.[0]?.name || '';
   showGSheetBar(filename);
+  const clientLabel = activeClient.nom !== 'Standard' ? activeClient.nom : 'Standard (pas de contrainte MPN)';
+  collapseImportZone(`${filename || 'BOM chargée'} — ${rows.length} composant(s) — client : ${clientLabel}`);
 }
 // ============================================================
 // FIN ANALYSE BOM
@@ -1817,6 +1866,7 @@ function buildBomRow(row, meta, idx) {
 
   const purchaseQtyRaw = getColValue(row,'Purchase qty');
   const purchaseQty = purchaseQtyRaw!=='' && purchaseQtyRaw!==undefined ? parseFloat(purchaseQtyRaw) : undefined;
+  meta.hasPartialStock = purchaseQty!==undefined && si.qty>0 && si.qty<purchaseQty;
 
   const icons={sensor:'ti-radar',battery:'ti-battery','not-sealed':'ti-droplet-off','msl4+':'ti-moisture'};
   const labels={sensor:'Capteur',battery:'Batterie','not-sealed':'Non étanche','msl4+':'MSL≥4'};
@@ -1843,9 +1893,9 @@ function buildBomRow(row, meta, idx) {
         ${meta.confidence==='high'?'🟢':meta.confidence==='medium'?'🟡':'🔴'} ${meta.confidence||'?'}
       </span>
     </td>
-    <td style="font-size:12px">${notes}${(meta.qc_issues&&meta.qc_issues.length)?`<br><span style="color:var(--amber);font-size:11px">${meta.qc_issues.map(q=>'• '+q).join('<br>')}</span>`:''}</td>
+    <td>${renderStockCell(si, idx, purchaseQty)}</td>
     <td style="vertical-align:top">${statusBadge}${mpnBadge}${warnBadges}</td>
-    <td>${renderStockCell(si, idx, purchaseQty)}</td>`;
+    <td style="font-size:12px">${notes}${(meta.qc_issues&&meta.qc_issues.length)?`<br><span style="color:var(--amber);font-size:11px">${meta.qc_issues.map(q=>'• '+q).join('<br>')}</span>`:''}</td>`;
   return { tr, si };
 }
 
@@ -1978,6 +2028,7 @@ function applyFilter() {
     else if (currentFilter === 'warn') show = meta.status === 'warn' || (meta.warnings && meta.warnings.length > 0);
     else if (currentFilter === 'mpn') show = meta.mpnWarn;
     else if (currentFilter === 'fuzzy-stock') show = !!meta.hasFuzzy;
+    else if (currentFilter === 'partial-stock') show = !!meta.hasPartialStock;
     else show = meta.warnings && meta.warnings.includes(currentFilter);
     tr.style.display = show ? '' : 'none';
     if (show) visible++;
@@ -1998,13 +2049,14 @@ function applyFilter() {
 }
 
 function updateFilterCounts() {
-  const counts = { all:0, error:0, warn:0, mpn:0, sensor:0, battery:0, 'not-sealed':0, 'msl4+':0, 'fuzzy-stock':0 };
+  const counts = { all:0, error:0, warn:0, mpn:0, sensor:0, battery:0, 'not-sealed':0, 'msl4+':0, 'fuzzy-stock':0, 'partial-stock':0 };
   rowMeta.forEach(m => {
     counts.all++;
     if (m.status === 'error') counts.error++;
     if (m.status === 'warn' || (m.warnings && m.warnings.length)) counts.warn++;
     if (m.mpnWarn) counts.mpn++;
     if (m.hasFuzzy) counts['fuzzy-stock']++;
+    if (m.hasPartialStock) counts['partial-stock']++;
     if (m.warnings) m.warnings.forEach(w => { if (counts[w] !== undefined) counts[w]++; });
   });
   document.getElementById('fc-all').textContent = counts.all;
@@ -2016,9 +2068,10 @@ function updateFilterCounts() {
   document.getElementById('fc-sealed').textContent = counts['not-sealed'];
   document.getElementById('fc-msl').textContent = counts['msl4+'];
   document.getElementById('fc-fuzzystock').textContent = counts['fuzzy-stock'];
+  document.getElementById('fc-partialstock').textContent = counts['partial-stock'];
 
   // Hide filter buttons with 0 results (except "Tous" et filtres actifs)
-  const filterMap = {'error':'.f-err','warn':'.f-warn','mpn':'.f-mpn','sensor':'.f-sensor','battery':'.f-battery','not-sealed':'.f-sealed','msl4+':'.f-msl','fuzzy-stock':'.f-fuzzystock'};
+  const filterMap = {'error':'.f-err','warn':'.f-warn','mpn':'.f-mpn','sensor':'.f-sensor','battery':'.f-battery','not-sealed':'.f-sealed','msl4+':'.f-msl','fuzzy-stock':'.f-fuzzystock','partial-stock':'.f-partialstock'};
   Object.entries(counts).forEach(([k,v]) => {
     if (k === 'all') return;
     const btn = document.querySelector('.filter-btn' + (filterMap[k]||''));
@@ -2026,7 +2079,7 @@ function updateFilterCounts() {
   });
 
   // Show filter bar only if there's something to filter
-  const hasIssues = counts.error > 0 || counts.warn > 0 || counts.mpn > 0 || counts['fuzzy-stock'] > 0;
+  const hasIssues = counts.error > 0 || counts.warn > 0 || counts.mpn > 0 || counts['fuzzy-stock'] > 0 || counts['partial-stock'] > 0;
   document.getElementById('filter-bar').style.display = hasIssues ? 'flex' : 'none';
 }
 // ---- END FILTER SYSTEM ----
@@ -2375,6 +2428,7 @@ function clearBOM() {
   document.getElementById('bom-sheet-selector').style.display = 'none';
   bomWorkbook = null;
   bomData=[];
+  expandImportZone();
 }
 </script>
 
