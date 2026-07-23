@@ -381,7 +381,8 @@ textarea {
 .bom-table-wrap {
   overflow-x: auto;
   margin-top: 1rem;
-  max-height: 440px;
+  height: 68vh;
+  min-height: 420px;
   overflow-y: auto;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -1698,11 +1699,15 @@ function resolveStockQty(row, idx, ipnOverride) {
 
 function applyFuzzyStock(idx, key, qty, source) {
   stockOverrides[idx] = { qty, source, matchedKey: key };
+  if (rowMeta[idx]) {
+    rowMeta[idx].stockNote = `Stock substitué : correspondance approchante avec ${key} (${source}) — à vérifier avant utilisation.`;
+  }
   rerenderBomTable(false);
 }
 
 function clearFuzzyStock(idx) {
   delete stockOverrides[idx];
+  if (rowMeta[idx]) delete rowMeta[idx].stockNote;
   rerenderBomTable(false);
 }
 // ============================================================
@@ -1944,7 +1949,7 @@ function buildBomRow(row, meta, idx) {
     </td>
     <td>${renderStockCell(si, idx, purchaseQty)}</td>
     <td style="vertical-align:top">${statusBadge}${mpnBadge}${warnBadges}</td>
-    <td style="font-size:12px">${notes}${(meta.qc_issues&&meta.qc_issues.length)?`<br><span style="color:var(--amber);font-size:11px">${meta.qc_issues.map(q=>'• '+q).join('<br>')}</span>`:''}</td>`;
+    <td style="font-size:12px">${notes}${(meta.qc_issues&&meta.qc_issues.length)?`<br><span style="color:var(--amber);font-size:11px">${meta.qc_issues.map(q=>'• '+q).join('<br>')}</span>`:''}${meta.stockNote?`<br><span style="color:var(--blue);font-size:11px">• ${meta.stockNote}</span>`:''}</td>`;
   return { tr, si };
 }
 
@@ -2034,8 +2039,11 @@ function splitPartialStock(idx) {
   row['Aggregated qty'] = String(remainQty);
   row['Purchase qty'] = String(remainQty);
 
+  const invMeta = { ...meta, stockNote: `Stock partiel : ${stockQty} pris en inventaire.` };
+  meta.stockNote = `Stock partiel : reste à commander ${remainQty} (purchase qty ${purchaseQty} − ${stockQty} en stock).`;
+
   bomData.splice(idx, 1, invRow, row);
-  rowMeta.splice(idx, 1, { ...meta }, meta);
+  rowMeta.splice(idx, 1, invMeta, meta);
 
   // Décale les overrides existants d'un cran (une ligne de plus vient d'être insérée), puis
   // marque la ligne restante (désormais à idx+1) comme "stock déjà affecté" : son vrai chiffre
@@ -2334,10 +2342,24 @@ async function writeToGSheet() {
     row['Reçus'] = si.qty !== null ? String(si.qty) : '';
   });
 
-  // Injecter les points de vigilance qualité (Gemini + catégories Claude) dans la colonne Notes
+  // Injecter dans la colonne Notes : points de vigilance qualité (Gemini + catégories Claude),
+  // warnings capteur/batterie/non-étanche/MSL (jusqu'ici présents dans l'export XLS via un rapport
+  // séparé, mais absents de l'écriture GSheet — retour terrain du 23/07), et annotations stock
+  // (scission stock partiel / match flou adopté), pour que le magasinier ait toute l'info en un
+  // seul endroit sur la ligne concernée.
+  const WARNING_LABELS = {
+    sensor: 'Capteur (pression/humidité/température)',
+    battery: 'Pile / batterie',
+    'not-sealed': 'Composant non étanche',
+    'msl4+': 'MSL ≥ 4'
+  };
   bomData.forEach((row, i) => {
-    const issues = (rowMeta[i] && rowMeta[i].qc_issues) || [];
-    row['Notes'] = issues.length ? issues.map(q => '• ' + q).join('\n') : '';
+    const meta = rowMeta[i] || {};
+    const lines = [];
+    (meta.qc_issues || []).forEach(q => lines.push('• ' + q));
+    (meta.warnings || []).forEach(w => lines.push('• ⚠ ' + (WARNING_LABELS[w] || w)));
+    if (meta.stockNote) lines.push('• ' + meta.stockNote);
+    row['Notes'] = lines.join('\n');
   });
 
   // 19 colonnes A→S envoyées PAR NOM (objets, pas tableaux positionnels) — le pipeline N8N
