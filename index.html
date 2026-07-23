@@ -1587,6 +1587,50 @@ function levenshtein(a, b) {
   return dp[m][n];
 }
 
+// Parse un IPN résistance ou condensateur selon la convention Proto Process :
+//   Résistance      : R<valeur>-<boîtier>[-...]              ex. R10K-0603, R40K2-0603-0W33
+//   Condensateur    : C<valeur>-<boîtier>-<tension>-<tolérance>-...  ex. C10U-0603-16V-10P-X5R
+//   Condensateur Ta : CT<valeur>-<case>-<tension>-<tolérance>-...    ex. CT10U-A-20V-20P-5R
+// Renvoie null si la chaîne ne correspond à aucun de ces formats (MPN générique, IPN non codifié…).
+function parseRCIpn(str) {
+  const s = (str||'').trim().toUpperCase();
+  if (!s) return null;
+  const parts = s.split('-');
+  if (parts.length < 2) return null;
+
+  let m = parts[0].match(/^R(\d+[RKM]\d*)$/);
+  if (m) return { type:'R', value:m[1], pkg:parts[1]||'', voltage:null, tolerance:null };
+
+  m = parts[0].match(/^CT(\d+[PNUF]\d*)$/);
+  if (m) return { type:'C', value:m[1], pkg:parts[1]||'', voltage:parts[2]||null, tolerance:parts[3]||null };
+
+  m = parts[0].match(/^C(\d+[PNUF]\d*)$/);
+  if (m) return { type:'C', value:m[1], pkg:parts[1]||'', voltage:parts[2]||null, tolerance:parts[3]||null };
+
+  return null;
+}
+
+// Compatibilité R/C stricte, demandée suite au retour terrain du 23/07 : une valeur "voisine"
+// (ex. 470n proposé pour 47n) n'est jamais acceptable, contrairement à une simple faute de frappe
+// sur un MPN générique. Renvoie true/false si les deux côtés sont des R/C reconnus, null sinon
+// (dans ce cas fuzzyScore retombe sur le matching flou générique par distance d'édition).
+function rcCompatible(searchKey, candidateKey) {
+  const a = parseRCIpn(searchKey), b = parseRCIpn(candidateKey);
+  if (!a || !b) return null;
+  if (a.type !== b.type) return false;
+  if (a.value !== b.value) return false;
+  if (a.pkg !== b.pkg) return false;
+  if (a.voltage && b.voltage) {
+    const va = parseFloat(a.voltage), vb = parseFloat(b.voltage);
+    if (!isNaN(va) && !isNaN(vb) && vb < va) return false; // tension proposée doit être >= demandée
+  }
+  if (a.tolerance && b.tolerance) {
+    const ta = parseFloat(a.tolerance), tb = parseFloat(b.tolerance);
+    if (!isNaN(ta) && !isNaN(tb) && tb > ta) return false; // tolérance proposée doit être <= demandée
+  }
+  return true;
+}
+
 // Réutilise la liste de suffixes de conditionnement déjà définie pour la codification IPN
 // (textarea #rule-suffixes), pour ne pas pénaliser un match sur "BAS16" vs "BAS16,215" par ex.
 function stripPackagingSuffixes(str) {
@@ -1604,12 +1648,17 @@ function stripPackagingSuffixes(str) {
 }
 
 function fuzzyScore(a, b) {
+  const rc = rcCompatible(a, b);
+  if (rc === true) return 1;   // même valeur + même boîtier, tension/tolérance compatibles
+  if (rc === false) return 0;  // R/C reconnus des deux côtés mais valeur ou boîtier différents -> exclu
+  // sinon (pas un R/C des deux côtés) : matching flou générique par distance d'édition
   const na = stripPackagingSuffixes(a), nb = stripPackagingSuffixes(b);
   if (!na || !nb) return 0;
   const maxLen = Math.max(na.length, nb.length);
   if (!maxLen) return 0;
   return 1 - levenshtein(na, nb) / maxLen;
 }
+
 
 // Ne renvoie que les candidats qui franchissent FUZZY_MIN_SCORE, jusqu'à `limit` — peut
 // renvoyer 0 candidat si rien n'est assez proche. N'inclut pas les correspondances exactes
