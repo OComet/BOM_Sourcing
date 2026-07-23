@@ -4,34 +4,37 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BOM Sourcing — Codification &amp; Vérification Qualité</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root {
-  --bg: #F5F4F0;
-  --surface: #FFFFFF;
-  --surface2: #EFEFEB;
-  --border: #E0DED8;
-  --border2: #D0CEC8;
-  --text: #1A1916;
-  --text2: #6B6960;
-  --text3: #9A9890;
-  --blue: #185FA5;
-  --blue-bg: #E6F1FB;
-  --green: #3B6D11;
+  --bg: #0a0c12;
+  --surface: #1a2030;
+  --surface2: #161b27;
+  --border: #262e42;
+  --border2: #333d55;
+  --text: #e2e8f0;
+  --text2: #94a3b8;
+  --text3: #64748b;
+  --blue: #F07B1F;
+  --blue-bg: #2a1f10;
+  --pp-blue: #5BC4D8;
+  --green: #86c564;
   --green-bg: #EAF3DE;
-  --amber: #854F0B;
+  --green-badge: #3B6D11;
+  --amber: #eab676;
   --amber-bg: #FAEEDA;
-  --red: #A32D2D;
+  --amber-badge: #854F0B;
+  --red: #f09595;
   --red-bg: #FCEBEB;
-  --pink: #993556;
+  --red-badge: #A32D2D;
+  --pink: #ED93B1;
   --pink-bg: #FBEAF0;
+  --pink-badge: #993556;
   --pink-border: #ED93B1;
-  --radius: 8px;
-  --radius-lg: 12px;
-  --mono: 'DM Mono', monospace;
-  --sans: 'DM Sans', sans-serif;
+  --radius: 6px;
+  --radius-lg: 10px;
+  --mono: "SF Mono", "Cascadia Code", Consolas, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
 }
 
 * { box-sizing:border-box; margin:0; padding:0; }
@@ -45,13 +48,13 @@ body {
 }
 
 header {
-  background: var(--surface);
+  background: #0f1117;
   border-bottom: 1px solid var(--border);
   padding: 0 2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 56px;
+  height: 52px;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -61,22 +64,14 @@ header {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.3px;
+  font-size: 13px;
+  font-weight: 500;
 }
 
-.logo-icon {
-  width: 30px;
-  height: 30px;
-  background: var(--text);
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 15px;
-}
+.logo-text { display:flex; align-items:center; gap:0; font-size:13px; font-weight:500; }
+.logo-text .lt { color:#fff; }
+.logo-text .ls { color:#444; margin:0 3px; }
+.logo-text .lo { color:var(--blue); }
 
 .header-chips {
   display: flex;
@@ -96,8 +91,8 @@ header {
   color: var(--text2);
   font-family: var(--sans);
 }
-.chip.ok { border-color: #97C459; color: var(--green); background: var(--green-bg); }
-.chip.err { border-color: #F09595; color: var(--red); background: var(--red-bg); }
+.chip.ok { border-color: #97C459; color: var(--green-badge); background: var(--green-bg); }
+.chip.err { border-color: #F09595; color: var(--red-badge); background: var(--red-bg); }
 
 .main { max-width: 1100px; margin: 0 auto; padding: 2rem; }
 
@@ -146,9 +141,9 @@ header {
 
 .status-row { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text2); margin-top:10px; min-height:20px; }
 .status-dot { width:7px; height:7px; border-radius:50%; background:var(--border2); flex-shrink:0; }
-.status-dot.ok { background:var(--green); }
-.status-dot.err { background:var(--red); }
-.status-dot.loading { background:var(--amber); animation:pulse 1s infinite; }
+.status-dot.ok { background:var(--green-badge); }
+.status-dot.err { background:var(--red-badge); }
+.status-dot.loading { background:var(--amber-badge); animation:pulse 1s infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
 /* TABS */
@@ -165,7 +160,7 @@ header {
   font-family: var(--sans);
   transition: color 0.15s;
 }
-.tab.active { color: var(--text); border-bottom-color: var(--text); }
+.tab.active { color: var(--blue); border-bottom-color: var(--blue); }
 .tab:hover:not(.active) { color: var(--text); }
 .panel { display:none; } .panel.active { display:block; }
 
@@ -184,8 +179,8 @@ input[type=text], textarea, select {
   outline: none;
 }
 input[type=text]:focus, textarea:focus, select:focus {
-  border-color: var(--text);
-  box-shadow: 0 0 0 3px rgba(26,25,22,0.06);
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(240,123,31,0.15);
 }
 textarea {
   resize: vertical;
@@ -215,7 +210,7 @@ textarea {
 }
 .btn:hover { background: var(--surface2); }
 .btn:active { transform: scale(0.98); }
-.btn.primary { background: var(--text); color: white; border-color: transparent; }
+.btn.primary { background: var(--blue); color: white; border-color: transparent; }
 .btn.primary:hover { opacity: 0.85; }
 .btn.sm { padding: 6px 12px; font-size: 12px; }
 .btn:disabled { opacity: 0.4; cursor: default; pointer-events: none; }
@@ -244,30 +239,30 @@ textarea {
 .row2 .col { flex:1; }
 
 /* BOM LOAD BAR */
-.conf-high { color: #3B6D11; font-size:11px; font-weight:600; }
-.conf-med  { color: #854F0B; font-size:11px; font-weight:600; }
-.conf-low  { color: #A32D2D; font-size:11px; font-weight:600; }
+.conf-high { color: var(--green); font-size:11px; font-weight:600; }
+.conf-med  { color: var(--amber); font-size:11px; font-weight:600; }
+.conf-low  { color: var(--red); font-size:11px; font-weight:600; }
 .rule-suggestion {
-  background: #E6F1FB;
-  border: 1px solid #A8CBF0;
+  background: var(--blue-bg);
+  border: 1px solid var(--blue);
   border-radius: 8px;
   padding: 8px 12px;
   margin-top: 4px;
   font-size: 11px;
-  color: #185FA5;
+  color: var(--blue);
   display: flex;
   align-items: flex-start;
   gap: 8px;
   flex-wrap: wrap;
 }
-.rule-suggestion-text { flex:1; font-family: var(--font-mono, monospace); line-height:1.5; }
+.rule-suggestion-text { flex:1; font-family: var(--mono); line-height:1.5; }
 .rule-suggestion-actions { display:flex; gap:6px; flex-shrink:0; }
-.btn-rule-add { font-size:11px; padding:3px 10px; border-radius:5px; border:1px solid #185FA5; background:#185FA5; color:white; cursor:pointer; font-family:inherit; }
+.btn-rule-add { font-size:11px; padding:3px 10px; border-radius:5px; border:1px solid var(--blue); background:var(--blue); color:white; cursor:pointer; font-family:inherit; }
 .btn-rule-add:hover { opacity:0.85; }
-.btn-rule-skip { font-size:11px; padding:3px 10px; border-radius:5px; border:1px solid var(--color-border-secondary); background:transparent; color:var(--color-text-secondary); cursor:pointer; font-family:inherit; }
-.rule-added-badge { font-size:10px; color:#3B6D11; background:#EAF3DE; padding:2px 7px; border-radius:10px; }
+.btn-rule-skip { font-size:11px; padding:3px 10px; border-radius:5px; border:1px solid var(--border); background:transparent; color:var(--text2); cursor:pointer; font-family:inherit; }
+.rule-added-badge { font-size:10px; color:var(--green-badge); background:var(--green-bg); padding:2px 7px; border-radius:10px; }
 .bom-src-btn { opacity: 0.6; }
-.bom-src-btn.active { opacity: 1; background: var(--text); color: white; border-color: transparent; }
+.bom-src-btn.active { opacity: 1; background: var(--blue); color: white; border-color: transparent; }
 .upload-drop-zone {
   border: 1.5px dashed var(--border2);
   border-radius: var(--radius-lg);
@@ -280,13 +275,13 @@ textarea {
   line-height: 1.6;
 }
 .upload-drop-zone:hover, .upload-drop-zone.dragover {
-  border-color: var(--text);
+  border-color: var(--blue);
   background: var(--surface2);
 }
 .upload-drop-zone.loaded {
   border-color: #97C459;
   background: var(--green-bg);
-  color: var(--green);
+  color: var(--green-badge);
 }
 .bom-load-bar {
   display: flex;
@@ -328,10 +323,10 @@ textarea {
   font-weight: 600;
   white-space: nowrap;
 }
-.b-ok { background:var(--green-bg); color:var(--green); }
-.b-warn { background:var(--amber-bg); color:var(--amber); }
-.b-err { background:var(--red-bg); color:var(--red); }
-.b-strict { background:var(--pink-bg); color:var(--pink); border:1px solid var(--pink-border); }
+.b-ok { background:var(--green-bg); color:var(--green-badge); }
+.b-warn { background:var(--amber-bg); color:var(--amber-badge); }
+.b-err { background:var(--red-bg); color:var(--red-badge); }
+.b-strict { background:var(--pink-bg); color:var(--pink-badge); border:1px solid var(--pink-border); }
 .b-info { background:var(--blue-bg); color:var(--blue); }
 
 /* TABLE */
@@ -359,14 +354,15 @@ textarea {
   white-space: nowrap;
 }
 .filter-btn:hover { background: var(--surface2); color: var(--text); }
-.filter-btn.active { background: var(--text); color: white; border-color: transparent; }
-.filter-btn.active.f-warn { background: var(--amber); }
-.filter-btn.active.f-err { background: var(--red); }
-.filter-btn.active.f-mpn { background: var(--pink); }
+.filter-btn.active { background: var(--blue); color: white; border-color: transparent; }
+.filter-btn.active.f-warn { background: var(--amber-badge); }
+.filter-btn.active.f-err { background: var(--red-badge); }
+.filter-btn.active.f-mpn { background: var(--pink-badge); }
 .filter-btn.active.f-sensor { background: #5B6FBE; }
 .filter-btn.active.f-battery { background: #5B6FBE; }
 .filter-btn.active.f-sealed { background: #5B6FBE; }
 .filter-btn.active.f-msl { background: #5B6FBE; }
+.filter-btn.active.f-fuzzystock { background: #5B6FBE; }
 .filter-count {
   font-size: 11px;
   padding: 1px 6px;
@@ -413,9 +409,9 @@ td {
 }
 tr:last-child td { border-bottom: none; }
 tr:hover td { background: var(--surface2); }
-.row-warn td { background: #FAEEDA18; }
-.row-err td { background: #FCEBEB18; }
-.row-mpnwarn td { background: #FBEAF018; }
+.row-warn td:first-child { box-shadow: inset 3px 0 0 var(--amber-badge); }
+.row-err td:first-child { box-shadow: inset 3px 0 0 var(--red-badge); }
+.row-mpnwarn td:first-child { box-shadow: inset 3px 0 0 var(--pink-badge); }
 
 .editable-ipn {
   font-family: var(--mono);
@@ -462,6 +458,69 @@ tr:hover td { background: var(--surface2); }
 .s-zero { color:var(--red); font-weight:600; font-family:var(--mono); }
 .s-na { color:var(--text3); }
 .s-mpnwarn { color:var(--pink); font-weight:600; font-family:var(--mono); }
+
+.stock-split-btn {
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 20px;
+  border: 1px solid var(--blue);
+  background: var(--blue-bg);
+  color: var(--blue);
+  cursor: pointer;
+  font-family: var(--sans);
+  white-space: nowrap;
+  align-self: flex-start;
+}
+.stock-split-btn:hover { background: var(--blue); color: white; }
+
+.fuzzy-applied-tag {
+  font-size: 10px;
+  color: var(--text3);
+  cursor: pointer;
+  margin-left: 3px;
+}
+.fuzzy-applied-tag:hover { color: var(--red); }
+
+.fuzzy-wrap { position: relative; display: inline-block; }
+.fuzzy-toggle {
+  border: none;
+  background: none;
+  color: var(--text3);
+  cursor: pointer;
+  padding: 1px 3px;
+  font-size: 13px;
+  line-height: 1;
+}
+.fuzzy-toggle:hover { color: var(--blue); }
+.fuzzy-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 10;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  min-width: 150px;
+  padding: 4px;
+  margin-top: 2px;
+}
+.fuzzy-dropdown.open { display: block; }
+.fuzzy-cand {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 7px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 11px;
+}
+.fuzzy-cand:hover { background: var(--blue-bg); }
+.fuzzy-key { font-family: var(--mono); color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; }
+.fuzzy-qty { font-family: var(--mono); font-weight: 600; color: var(--text2); flex-shrink: 0; }
 
 /* CODIF */
 .ipn-result-card {
@@ -528,8 +587,8 @@ tr:hover td { background: var(--surface2); }
 
 <header>
   <div class="logo">
-    <div class="logo-icon"><i class="ti ti-circuit-board" aria-hidden="true"></i></div>
-    BOM Sourcing
+    <img src="picto-pp.png" alt="Proto Process" width="24" height="24" style="object-fit:contain" onerror="this.style.display='none'">
+    <span class="logo-text"><span class="lt">PROTO PROCESS</span><span class="ls">/</span><span class="lo">BOM Sourcing</span></span>
   </div>
   <div class="header-chips" id="header-chips"></div>
   <div style="display:flex;gap:8px;align-items:center;">
@@ -557,14 +616,14 @@ tr:hover td { background: var(--surface2); }
     </div>
 
     <div class="card" style="margin-bottom:16px; border:1.5px solid #97C459; background:var(--green-bg);">
-      <div class="setup-card-title" style="margin-bottom:10px"><i class="ti ti-plug" aria-hidden="true" style="color:var(--green)"></i> <span style="color:var(--green)">Webhook N8N — Codification &amp; vérification qualité</span> <span class="fixed-tag">obligatoire</span></div>
+      <div class="setup-card-title" style="margin-bottom:10px"><i class="ti ti-plug" aria-hidden="true" style="color:var(--green-badge)"></i> <span style="color:var(--green-badge)">Webhook N8N — Codification &amp; vérification qualité</span> <span class="fixed-tag">obligatoire</span></div>
       <label>URL du webhook (Production)</label>
       <input type="text" id="setup-webhook-url" value="https://protoprocess.app.n8n.cloud/webhook/bom-analyzer" />
       <p class="hint">Remplace l'appel Claude direct côté navigateur : codification IPN + vérification croisée Digikey/Mouser/Gemini gérées par N8N.</p>
     </div>
 
     <div class="card" style="margin-bottom:16px; border:1.5px solid #97C459; background:var(--green-bg);">
-      <div class="setup-card-title" style="margin-bottom:10px"><i class="ti ti-table" aria-hidden="true" style="color:var(--green)"></i> <span style="color:var(--green)">Webhook N8N — Écriture GSheet achat</span> <span class="fixed-tag">obligatoire pour écrire</span></div>
+      <div class="setup-card-title" style="margin-bottom:10px"><i class="ti ti-table" aria-hidden="true" style="color:var(--green-badge)"></i> <span style="color:var(--green-badge)">Webhook N8N — Écriture GSheet achat</span> <span class="fixed-tag">obligatoire pour écrire</span></div>
       <label>URL du webhook (Production)</label>
       <input type="text" id="setup-writer-url" value="https://protoprocess.app.n8n.cloud/webhook/achats-ecriture-gsheet" />
       <p class="hint">Remplace le writer Apps Script + proxy Cloudflare : recherche le fichier GSheet achat par N° SO dans Drive, vide puis écrit les lignes. <strong>Le champ N° SO devient obligatoire</strong> — la recherche se fait uniquement par SO (plus par client+carte).</p>
@@ -699,17 +758,17 @@ tr:hover td { background: var(--surface2); }
       <!-- GSheet achat writer bar -->
       <div id="gsheet-write-bar" style="display:none; margin-bottom:10px;">
         <div style="display:flex; gap:12px; align-items:center; padding:12px 16px; background:var(--green-bg); border:1px solid #97C459; border-radius:var(--radius-lg); flex-wrap:wrap;">
-          <i class="ti ti-table" style="font-size:20px; color:var(--green); flex-shrink:0;" aria-hidden="true"></i>
+          <i class="ti ti-table" style="font-size:20px; color:var(--green-badge); flex-shrink:0;" aria-hidden="true"></i>
           <div style="flex:1;">
-            <div style="font-size:13px; font-weight:600; color:var(--green);" id="gsheet-file-info">GSheet achat détectée</div>
-            <div style="font-size:11px; color:var(--green); opacity:0.8;">Le dossier Drive sera recherché automatiquement par SO + référence</div>
+            <div style="font-size:13px; font-weight:600; color:var(--green-badge);" id="gsheet-file-info">GSheet achat détectée</div>
+            <div style="font-size:11px; color:var(--green-badge); opacity:0.8;">Le dossier Drive sera recherché automatiquement par SO + référence</div>
           </div>
           <div style="display:flex; gap:8px; align-items:center; flex-shrink:0;">
-            <label style="font-size:12px; color:var(--green); white-space:nowrap; margin:0; font-weight:600;">N° SO <span style="font-weight:400;opacity:0.7">(obligatoire)</span></label>
+            <label style="font-size:12px; color:var(--green-badge); white-space:nowrap; margin:0; font-weight:600;">N° SO <span style="font-weight:400;opacity:0.7">(obligatoire)</span></label>
             <input type="text" id="so-reference" placeholder="ex: SO2607-666" required
-              style="width:130px; border-color:#97C459; background:white; padding:6px 10px; font-size:13px; border-radius:6px; border:1px solid #97C459;" />
+              style="width:130px; border-color:#97C459; background:var(--surface); color:var(--text); padding:6px 10px; font-size:13px; border-radius:6px; border:1px solid #97C459;" />
           </div>
-          <button class="btn" onclick="writeToGSheet()" style="background:var(--green); color:white; border-color:transparent; flex-shrink:0;">
+          <button class="btn" onclick="writeToGSheet()" style="background:var(--green-badge); color:white; border-color:transparent; flex-shrink:0;">
             <i class="ti ti-send" aria-hidden="true"></i> Écrire dans GSheet achat
           </button>
           <div id="gsheet-write-status" style="font-size:12px; width:100%;"></div>
@@ -735,6 +794,7 @@ tr:hover td { background: var(--surface2); }
           <button class="filter-btn f-err" onclick="setFilter('error',this)"><i class="ti ti-x" aria-hidden="true"></i> Erreurs <span class="filter-count" id="fc-err">0</span></button>
           <button class="filter-btn f-warn" onclick="setFilter('warn',this)"><i class="ti ti-alert-triangle" aria-hidden="true"></i> Warnings <span class="filter-count" id="fc-warn">0</span></button>
           <button class="filter-btn f-mpn" onclick="setFilter('mpn',this)"><i class="ti ti-lock" aria-hidden="true"></i> MPN strict <span class="filter-count" id="fc-mpn">0</span></button>
+          <button class="filter-btn f-fuzzystock" onclick="setFilter('fuzzy-stock',this)"><i class="ti ti-help-circle" aria-hidden="true"></i> Stock potentiel <span class="filter-count" id="fc-fuzzystock">0</span></button>
           <div class="filter-sep"></div>
           <button class="filter-btn f-sensor" onclick="setFilter('sensor',this)"><i class="ti ti-radar" aria-hidden="true"></i> Capteurs <span class="filter-count" id="fc-sensor">0</span></button>
           <button class="filter-btn f-battery" onclick="setFilter('battery',this)"><i class="ti ti-battery" aria-hidden="true"></i> Batteries <span class="filter-count" id="fc-battery">0</span></button>
@@ -865,7 +925,7 @@ tr:hover td { background: var(--surface2); }
       <div class="section-label" style="margin-top:1rem">Logique stock & Clients</div>
       <div class="result-box" style="font-family:var(--font-sans,sans-serif); line-height:2; font-size:12px; color:var(--color-text-secondary); margin-top:0; margin-bottom:12px">
         <b style="color:var(--color-text-primary)">Client standard</b> — recherche IPN en priorité, puis MPN si absent<br>
-        <b style="color:#993556">Client MPN strict</b> — MPN en priorité. IPN dispo sans MPN → ⚠️ warning<br>
+        <b style="color:var(--pink)">Client MPN strict</b> — MPN en priorité. IPN dispo sans MPN → ⚠️ warning<br>
         Stock cherché sur IPN et MPN simultanément
       </div>
 
@@ -993,6 +1053,12 @@ let bomData = [];
 let csvBuffer = "";
 let bomWorkbook = null;
 let stockByIPN = {}, stockByMPN = {};
+// stockOverrides[idx] : décision manuelle de stock pour une ligne, valable pour la session
+// courante uniquement (jamais écrit dans le fichier stock lui-même) :
+//  - { qty, source, matchedKey } → correspondance floue adoptée par l'utilisateur
+//  - { suppressed: true } → stock déjà affecté à une autre ligne (scission stock partiel),
+//    on ignore volontairement le vrai chiffre du fichier stock pour cette ligne
+let stockOverrides = {};
 let clientsList = [];
 let activeClient = { nom:'Standard', mpn_strict:false, notes:'' };
 let sourceStatus = { clients:'none', stock:'none', rules:'none' };
@@ -1480,12 +1546,128 @@ function getStockInfo(ipn, mpn, manufacturerFree) {
   }
 }
 
-function renderStockCell(si) {
-  if (si.status==='na') return `<div class="stock-cell"><span class="s-na">—</span></div>`;
+// ============================================================
+// MATCHING FLOU DU STOCK — Phase A (suggestions, jamais d'écriture
+// dans le fichier stock lui-même ; adoption valable pour la session).
+// ============================================================
+function levenshtein(a, b) {
+  a = a || ''; b = b || '';
+  const m = a.length, n = b.length;
+  if (!m) return n;
+  if (!n) return m;
+  const dp = [];
+  for (let i=0;i<=m;i++) dp.push(new Array(n+1).fill(0));
+  for (let i=0;i<=m;i++) dp[i][0]=i;
+  for (let j=0;j<=n;j++) dp[0][j]=j;
+  for (let i=1;i<=m;i++) {
+    for (let j=1;j<=n;j++) {
+      dp[i][j] = a[i-1]===b[j-1] ? dp[i-1][j-1] : 1+Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+    }
+  }
+  return dp[m][n];
+}
+
+// Réutilise la liste de suffixes de conditionnement déjà définie pour la codification IPN
+// (textarea #rule-suffixes), pour ne pas pénaliser un match sur "BAS16" vs "BAS16,215" par ex.
+function stripPackagingSuffixes(str) {
+  str = (str||'').toUpperCase().trim();
+  if (!str) return str;
+  let suffixesRaw = '';
+  try { suffixesRaw = document.getElementById('rule-suffixes')?.value || ''; } catch(e) {}
+  const suffixes = suffixesRaw.split(/[,;\n]/).map(s=>s.trim().toUpperCase().replace(/^[#\-\/]+/,'')).filter(Boolean);
+  suffixes.forEach(suf => {
+    if (!suf) return;
+    const escaped = suf.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    str = str.replace(new RegExp('[#\\-/,]?' + escaped + '$'), '');
+  });
+  return str.replace(/[\s\-_,]/g,'');
+}
+
+function fuzzyScore(a, b) {
+  const na = stripPackagingSuffixes(a), nb = stripPackagingSuffixes(b);
+  if (!na || !nb) return 0;
+  const maxLen = Math.max(na.length, nb.length);
+  if (!maxLen) return 0;
+  return 1 - levenshtein(na, nb) / maxLen;
+}
+
+// Renvoie toujours jusqu'à `limit` candidats (les meilleurs trouvés), même approximatifs —
+// à l'utilisateur de juger. N'inclut pas les correspondances exactes (déjà gérées ailleurs).
+function findFuzzyStockCandidates(searchKey, limit) {
+  if (!searchKey) return [];
+  const seen = new Set();
+  const candidates = [];
+  Object.keys(stockByIPN).forEach(k => { if (k!==searchKey) candidates.push({key:k, qty:stockByIPN[k], source:'IPN', score:fuzzyScore(searchKey,k)}); });
+  Object.keys(stockByMPN).forEach(k => { if (k!==searchKey) candidates.push({key:k, qty:stockByMPN[k], source:'MPN', score:fuzzyScore(searchKey,k)}); });
+  candidates.sort((a,b)=>b.score-a.score);
+  const out = [];
+  for (const c of candidates) {
+    const dk = c.key+'|'+c.qty;
+    if (seen.has(dk)) continue;
+    seen.add(dk);
+    out.push(c);
+    if (out.length>=limit) break;
+  }
+  return out;
+}
+
+// Résout le stock effectif d'une ligne : override manuel (fuzzy adopté ou stock suppressé
+// après scission) sinon lookup normal, avec candidats flous attachés si aucun match exact.
+function resolveStockQty(row, idx, ipnOverride) {
+  const ov = stockOverrides[idx];
+  if (ov && ov.suppressed) return {qty:null, source:null, status:'na', mpnWarn:false};
+  const ipn = (ipnOverride!==undefined ? ipnOverride : (row['Approved internal part number']||row['IPN']||row['ipn']||'')).trim().toUpperCase();
+  const mpn = (row['MPN']||row['mpn']||'').trim().toUpperCase();
+  const mfrFree = row['Manufacturer free']||'';
+  if (ov) return {qty:ov.qty, source:ov.source, status:ov.qty>0?'ok':'zero', mpnWarn:false, fuzzyApplied:true, matchedKey:ov.matchedKey};
+  const si = getStockInfo(ipn, mpn, mfrFree);
+  if (si.status==='na') si.fuzzy = findFuzzyStockCandidates(ipn||mpn, 3);
+  return si;
+}
+
+function applyFuzzyStock(idx, key, qty, source) {
+  stockOverrides[idx] = { qty, source, matchedKey: key };
+  rerenderBomTable(false);
+}
+
+function clearFuzzyStock(idx) {
+  delete stockOverrides[idx];
+  rerenderBomTable(false);
+}
+// ============================================================
+// FIN MATCHING FLOU DU STOCK
+// ============================================================
+
+function renderStockCell(si, idx, purchaseQty) {
+  const needSplit = purchaseQty!==undefined && si.qty>0 && si.qty<purchaseQty;
+  const splitBtn = needSplit
+    ? `<button class="stock-split-btn" onclick="splitPartialStock(${idx})" title="${si.qty} en stock, ${purchaseQty-si.qty} à commander">Utiliser la qté en stock</button>`
+    : '';
+
+  if (si.status==='na') {
+    const cands = si.fuzzy || [];
+    if (!cands.length) return `<div class="stock-cell"><span class="s-na">—</span></div>`;
+    const list = cands.map(c => `<div class="fuzzy-cand" onclick="applyFuzzyStock(${idx},'${String(c.key).replace(/'/g,"\\'")}',${c.qty},'${c.source}')">
+      <span class="fuzzy-key" title="${c.key}">${c.key}</span><span class="fuzzy-qty">${c.qty}</span>
+    </div>`).join('');
+    return `<div class="stock-cell">
+      <span class="s-na">—</span>
+      <span class="fuzzy-wrap">
+        <button class="fuzzy-toggle" type="button" onclick="this.nextElementSibling.classList.toggle('open')" title="Correspondances approchantes"><i class="ti ti-help-circle" aria-hidden="true"></i></button>
+        <div class="fuzzy-dropdown">${list}</div>
+      </span>
+    </div>`;
+  }
   if (si.status==='mpnwarn') return `<div class="stock-cell">
     <span class="stock-line" style="color:var(--pink);font-size:11px"><i class="ti ti-lock" aria-hidden="true"></i> MPN imposé</span>
   </div>`;
-  return `<div class="stock-cell"><span class="stock-line"><span class="slbl">${si.source}</span><span class="${si.status==='ok'?'s-ok':'s-zero'}">${si.qty}</span></span></div>`;
+  const fuzzyTag = si.fuzzyApplied
+    ? `<span class="fuzzy-applied-tag" title="Correspondance approchante choisie manuellement (${si.matchedKey}) — cliquer pour annuler" onclick="clearFuzzyStock(${idx})">≈<i class="ti ti-x" aria-hidden="true"></i></span>`
+    : '';
+  return `<div class="stock-cell">
+    <span class="stock-line"><span class="slbl">${si.source}</span><span class="${si.status==='ok'?'s-ok':'s-zero'}">${si.qty}</span>${fuzzyTag}</span>
+    ${splitBtn}
+  </div>`;
 }
 
 // ============================================================
@@ -1595,9 +1777,9 @@ async function acceptRule(key, value, rowIdx) {
   if (result.success) {
     sug.innerHTML = '<span class="rule-added-badge">✓ Règle ajoutée au sheet</span>';
   } else if (result.existing) {
-    sug.innerHTML = '<span class="rule-added-badge" style="background:#FAEEDA;color:#854F0B">⚠ Clé déjà existante dans le sheet</span>';
+    sug.innerHTML = '<span class="rule-added-badge" style="background:var(--amber-bg);color:var(--amber-badge)">⚠ Clé déjà existante dans le sheet</span>';
   } else {
-    sug.innerHTML = '<span style="color:#A32D2D;font-size:11px">Erreur: ' + result.error + '</span>';
+    sug.innerHTML = '<span style="color:var(--red);font-size:11px">Erreur: ' + result.error + '</span>';
   }
 }
 
@@ -1607,74 +1789,104 @@ function skipRule(rowIdx) {
 }
 // ============================================================
 
-function renderBOMTable(rows,results) {
+// Helper global (case-insensitive, aussi utilisé par exportCSV/writeToGSheet) — cherche une
+// valeur de colonne par nom exact d'abord, puis par correspondance insensible à la casse.
+function getColValue(row, colName) {
+  if (!row) return '';
+  if (row[colName] !== undefined) return row[colName];
+  const found = Object.keys(row).find(k => k.toLowerCase().trim() === colName.toLowerCase().trim());
+  return found ? row[found] : '';
+}
+
+// Construit une seule ligne <tr> du tableau BOM à partir de la donnée brute (row) et des
+// métadonnées de codification (meta: status/warnings/qc_issues/confidence/ipn). Partagé entre
+// le rendu initial et le re-rendu après scission de stock partiel ou adoption d'un match flou —
+// évite de dupliquer le HTML à deux endroits.
+function buildBomRow(row, meta, idx) {
+  const qty=findCol(row,['aggregated qty','qty','quantity','qté']);
+  const ref=findCol(row,['designator','reference','ref']);
+  const mpn=findCol(row,['mpn','manufacturer part','part number']);
+  const notes=findCol(row,['notes','note','approved parts','description','desc','value']);
+  const mfrFree=findCol(row,['manufacturer free','manufacturer_free','mfr free','free']);
+  const ipn=meta.ipn||'—';
+  const status=meta.status||'ok';
+  const warns=meta.warnings||[];
+  const si=resolveStockQty(row, idx, ipn);
+  meta.mpnWarn = si.mpnWarn;
+  meta.hasFuzzy = si.status==='na' && !!(si.fuzzy && si.fuzzy.length);
+
+  const purchaseQtyRaw = getColValue(row,'Purchase qty');
+  const purchaseQty = purchaseQtyRaw!=='' && purchaseQtyRaw!==undefined ? parseFloat(purchaseQtyRaw) : undefined;
+
+  const icons={sensor:'ti-radar',battery:'ti-battery','not-sealed':'ti-droplet-off','msl4+':'ti-moisture'};
+  const labels={sensor:'Capteur',battery:'Batterie','not-sealed':'Non étanche','msl4+':'MSL≥4'};
+  const warnBadges=warns.map(w=>`<span class="badge b-warn" style="margin-bottom:2px"><i class="ti ${icons[w]||'ti-alert-triangle'}" aria-hidden="true"></i> ${labels[w]||w}</span>`).join(' ');
+  const isFreeRow = (mfrFree||'').toLowerCase().trim() === 'yes';
+  const mpnBadge=si.mpnWarn
+    ?`<span class="badge b-strict" style="margin-bottom:2px"><i class="ti ti-lock" aria-hidden="true"></i> MPN strict</span>`
+    :(activeClient.mpn_strict && isFreeRow)
+      ?`<span class="badge b-ok" style="margin-bottom:2px"><i class="ti ti-check" aria-hidden="true"></i> IPN autorisé</span>`
+      :'';
+  const statusBadge=status==='ok'&&!warns.length&&!si.mpnWarn
+    ?`<span class="badge b-ok"><i class="ti ti-check" aria-hidden="true"></i></span>`
+    :status==='error'?`<span class="badge b-err"><i class="ti ti-x" aria-hidden="true"></i></span>`:'';
+  const rowClass=status==='error'?'row-err':si.mpnWarn?'row-mpnwarn':warns.length?'row-warn':'';
+  const tr=document.createElement('tr');
+  tr.className=rowClass;
+  tr.innerHTML=`
+    <td>${qty}</td>
+    <td style="font-size:11px">${ref}</td>
+    <td style="font-size:11px;font-family:var(--mono)">${mpn}</td>
+    <td>
+      <input class="editable-ipn" value="${ipn}" data-idx="${idx}" onchange="updateIPN(this)"/>
+      <span class="${meta.confidence==='high'?'conf-high':meta.confidence==='medium'?'conf-med':'conf-low'}" title="Confiance IA">
+        ${meta.confidence==='high'?'🟢':meta.confidence==='medium'?'🟡':'🔴'} ${meta.confidence||'?'}
+      </span>
+    </td>
+    <td style="font-size:12px">${notes}${(meta.qc_issues&&meta.qc_issues.length)?`<br><span style="color:var(--amber);font-size:11px">${meta.qc_issues.map(q=>'• '+q).join('<br>')}</span>`:''}</td>
+    <td style="vertical-align:top">${statusBadge}${mpnBadge}${warnBadges}</td>
+    <td>${renderStockCell(si, idx, purchaseQty)}</td>`;
+  return { tr, si };
+}
+
+// Reconstruit tout le corps du tableau à partir de l'état courant (bomData + rowMeta) — utilisé
+// aussi bien pour le premier rendu (via renderBOMTable) que pour les re-rendus légers après
+// scission de stock partiel ou adoption d'un match flou, sans redemander l'analyse N8N.
+function rerenderBomTable(resetFilter) {
   const tbody=document.getElementById('bom-tbody');
   tbody.innerHTML='';
   let cntOk=0,cntWarn=0,cntErr=0,cntMpnWarn=0;
   const warnSummary={sensor:[],battery:[],'not-sealed':[],'msl4+':[]};
   const icons={sensor:'ti-radar',battery:'ti-battery','not-sealed':'ti-droplet-off','msl4+':'ti-moisture'};
-  const labels={sensor:'Capteur',battery:'Batterie','not-sealed':'Non étanche','msl4+':'MSL≥4'};
   const wlabels={sensor:'Capteurs',battery:'Piles / batteries','not-sealed':'Composants non étanches','msl4+':'MSL niveau ≥ 4'};
 
-  rowMeta = [];
-  results.forEach((res,i)=>{
-    const row=rows[res.idx]??rows[i]??{};
-    const qty=findCol(row,['aggregated qty','qty','quantity','qté']);
+  bomData.forEach((row, i) => {
+    const meta = rowMeta[i] || (rowMeta[i] = {status:'ok', warnings:[], qc_issues:[], confidence:'medium', ipn:'—'});
     const ref=findCol(row,['designator','reference','ref']);
     const mpn=findCol(row,['mpn','manufacturer part','part number']);
-    const notes=findCol(row,['notes','note','approved parts','description','desc','value']);
-    const mfrFree=findCol(row,['manufacturer free','manufacturer_free','mfr free','free']);
-    const ipn=res.ipn||'—';
-    const status=res.status||'ok';
-    const warns=res.warnings||[];
-    const si=getStockInfo(ipn,mpn,mfrFree);
-    if(si.mpnWarn) cntMpnWarn++;
-    if(status==='ok'&&!warns.length&&!si.mpnWarn) cntOk++;
-    else if(status==='error') cntErr++;
+    const { tr, si } = buildBomRow(row, meta, i);
+    if (si.mpnWarn) cntMpnWarn++;
+    if (meta.status==='ok' && !(meta.warnings||[]).length && !si.mpnWarn) cntOk++;
+    else if (meta.status==='error') cntErr++;
     else cntWarn++;
-    warns.forEach(w=>{if(warnSummary[w]) warnSummary[w].push(ref||mpn);});
-    const warnBadges=warns.map(w=>`<span class="badge b-warn" style="margin-bottom:2px"><i class="ti ${icons[w]||'ti-alert-triangle'}" aria-hidden="true"></i> ${labels[w]||w}</span>`).join(' ');
-    const isFreeRow = (mfrFree||'').toLowerCase().trim() === 'yes';
-    const mpnBadge=si.mpnWarn
-      ?`<span class="badge b-strict" style="margin-bottom:2px"><i class="ti ti-lock" aria-hidden="true"></i> MPN strict</span>`
-      :(activeClient.mpn_strict && isFreeRow)
-        ?`<span class="badge b-ok" style="margin-bottom:2px"><i class="ti ti-check" aria-hidden="true"></i> IPN autorisé</span>`
-        :'';
-    const statusBadge=status==='ok'&&!warns.length&&!si.mpnWarn
-      ?`<span class="badge b-ok"><i class="ti ti-check" aria-hidden="true"></i></span>`
-      :status==='error'?`<span class="badge b-err"><i class="ti ti-x" aria-hidden="true"></i></span>`:'';
-    const rowClass=status==='error'?'row-err':si.mpnWarn?'row-mpnwarn':warns.length?'row-warn':'';
-    const tr=document.createElement('tr');
-    tr.className=rowClass;
-    tr.innerHTML=`
-      <td>${qty}</td>
-      <td style="font-size:11px">${ref}</td>
-      <td style="font-size:11px;font-family:var(--mono)">${mpn}</td>
-      <td>
-        <input class="editable-ipn" value="${ipn}" data-idx="${i}" onchange="updateIPN(this)"/>
-        <span class="${res.confidence==='high'?'conf-high':res.confidence==='medium'?'conf-med':'conf-low'}" title="Confiance IA">
-          ${res.confidence==='high'?'🟢':res.confidence==='medium'?'🟡':'🔴'} ${res.confidence||'?'}
-        </span>
-        ${renderRuleSuggestion(res, i)}
-      </td>
-      <td style="font-size:12px">${notes}${(res.qc_issues&&res.qc_issues.length)?`<br><span style="color:var(--amber);font-size:11px">${res.qc_issues.map(q=>'• '+q).join('<br>')}</span>`:''}</td>
-      <td style="vertical-align:top">${statusBadge}${mpnBadge}${warnBadges}</td>
-      <td>${renderStockCell(si)}</td>`;
+    (meta.warnings||[]).forEach(w=>{ if(warnSummary[w]) warnSummary[w].push(ref||mpn); });
     tbody.appendChild(tr);
-    rowMeta.push({ status, warnings: warns, mpnWarn: si.mpnWarn, qc_issues: res.qc_issues || [] });
   });
 
   const cl=activeClient.nom!=='Standard'?` — ${activeClient.nom}`:'';
   document.getElementById('bom-counters').innerHTML=`
-    <div class="counter"><div class="counter-val">${rows.length}</div><div class="counter-lbl">Composants</div></div>
+    <div class="counter"><div class="counter-val">${bomData.length}</div><div class="counter-lbl">Composants</div></div>
     <div class="counter"><div class="counter-val" style="color:var(--green)">${cntOk}</div><div class="counter-lbl">OK</div></div>
     <div class="counter"><div class="counter-val" style="color:var(--amber)">${cntWarn}</div><div class="counter-lbl">Warnings</div></div>
     ${activeClient.mpn_strict?`<div class="counter"><div class="counter-val" style="color:var(--pink)">${cntMpnWarn}</div><div class="counter-lbl">MPN non conf.${cl}</div></div>`:''}
     <div class="counter"><div class="counter-val" style="color:var(--red)">${cntErr}</div><div class="counter-lbl">Erreurs</div></div>`;
 
   updateFilterCounts();
-  currentFilter = 'all';
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.classList.contains('f-all')));
+  if (resetFilter) {
+    currentFilter = 'all';
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.classList.contains('f-all')));
+  }
+  applyFilter();
 
   const warnItems=Object.entries(warnSummary).filter(([,v])=>v.length);
   document.getElementById('bom-warnings-section').innerHTML=warnItems.length?`<div class="warn-box">
@@ -1682,6 +1894,66 @@ function renderBOMTable(rows,results) {
     ${warnItems.map(([k,v])=>`<div class="warn-item"><i class="ti ${icons[k]}" aria-hidden="true"></i><div><strong>${wlabels[k]}</strong><br><span style="font-size:12px;color:var(--text2)">${v.join(', ')}</span></div></div>`).join('')}
   </div>`:'';
 }
+
+function renderBOMTable(rows,results) {
+  rowMeta = [];
+  results.forEach((res,i)=>{
+    const idx = res.idx ?? i;
+    rowMeta[idx] = {
+      status: res.status || 'ok',
+      warnings: res.warnings || [],
+      qc_issues: res.qc_issues || [],
+      confidence: res.confidence || 'medium',
+      ipn: res.ipn || '—'
+    };
+  });
+  rerenderBomTable(true);
+}
+
+// ============================================================
+// STOCK PARTIEL — scinde une ligne en deux : la part couverte par le stock (Inventory,
+// prix d'achat nul) et la part restante à commander chez le fournisseur d'origine.
+// Purement côté navigateur, aucun appel N8N nécessaire (la codification IPN ne change pas).
+// ============================================================
+function splitPartialStock(idx) {
+  const row = bomData[idx];
+  const meta = rowMeta[idx];
+  if (!row || !meta) return;
+  const si = resolveStockQty(row, idx, meta.ipn);
+  const stockQty = si.qty || 0;
+  const purchaseQty = parseFloat(getColValue(row,'Purchase qty')) || 0;
+  if (!(stockQty > 0 && stockQty < purchaseQty)) return;
+
+  const remainQty = purchaseQty - stockQty;
+
+  const invRow = { ...row };
+  invRow['Aggregated qty'] = String(stockQty);
+  invRow['Purchase qty'] = String(stockQty);
+  invRow['Purchase price'] = '0';
+  invRow['Supplier'] = 'Inventory';
+
+  row['Aggregated qty'] = String(remainQty);
+  row['Purchase qty'] = String(remainQty);
+
+  bomData.splice(idx, 1, invRow, row);
+  rowMeta.splice(idx, 1, { ...meta }, meta);
+
+  // Décale les overrides existants d'un cran (une ligne de plus vient d'être insérée), puis
+  // marque la ligne restante (désormais à idx+1) comme "stock déjà affecté" : son vrai chiffre
+  // de stock ne doit plus être proposé/écrit pour elle, il a été consommé par la ligne Inventory.
+  const shifted = {};
+  Object.keys(stockOverrides).forEach(k => {
+    const n = parseInt(k);
+    shifted[n > idx ? n+1 : n] = stockOverrides[k];
+  });
+  shifted[idx+1] = { suppressed: true };
+  stockOverrides = shifted;
+
+  rerenderBomTable(false);
+}
+// ============================================================
+// FIN STOCK PARTIEL
+// ============================================================
 
 // ---- FILTER SYSTEM ----
 let currentFilter = 'all';
@@ -1705,6 +1977,7 @@ function applyFilter() {
     else if (currentFilter === 'error') show = meta.status === 'error';
     else if (currentFilter === 'warn') show = meta.status === 'warn' || (meta.warnings && meta.warnings.length > 0);
     else if (currentFilter === 'mpn') show = meta.mpnWarn;
+    else if (currentFilter === 'fuzzy-stock') show = !!meta.hasFuzzy;
     else show = meta.warnings && meta.warnings.includes(currentFilter);
     tr.style.display = show ? '' : 'none';
     if (show) visible++;
@@ -1725,12 +1998,13 @@ function applyFilter() {
 }
 
 function updateFilterCounts() {
-  const counts = { all:0, error:0, warn:0, mpn:0, sensor:0, battery:0, 'not-sealed':0, 'msl4+':0 };
+  const counts = { all:0, error:0, warn:0, mpn:0, sensor:0, battery:0, 'not-sealed':0, 'msl4+':0, 'fuzzy-stock':0 };
   rowMeta.forEach(m => {
     counts.all++;
     if (m.status === 'error') counts.error++;
     if (m.status === 'warn' || (m.warnings && m.warnings.length)) counts.warn++;
     if (m.mpnWarn) counts.mpn++;
+    if (m.hasFuzzy) counts['fuzzy-stock']++;
     if (m.warnings) m.warnings.forEach(w => { if (counts[w] !== undefined) counts[w]++; });
   });
   document.getElementById('fc-all').textContent = counts.all;
@@ -1741,10 +2015,10 @@ function updateFilterCounts() {
   document.getElementById('fc-battery').textContent = counts.battery;
   document.getElementById('fc-sealed').textContent = counts['not-sealed'];
   document.getElementById('fc-msl').textContent = counts['msl4+'];
+  document.getElementById('fc-fuzzystock').textContent = counts['fuzzy-stock'];
 
-  // Hide filter buttons with 0 results (except "Tous" and active filters)
-  const map = {error:'fc-err',warn:'fc-warn',mpn:'fc-mpn',sensor:'fc-sensor',battery:'fc-battery','not-sealed':'fc-sealed','msl4+':'fc-msl'};
-  const filterMap = {'error':'.f-err','warn':'.f-warn','mpn':'.f-mpn','sensor':'.f-sensor','battery':'.f-battery','not-sealed':'.f-sealed','msl4+':'.f-msl'};
+  // Hide filter buttons with 0 results (except "Tous" et filtres actifs)
+  const filterMap = {'error':'.f-err','warn':'.f-warn','mpn':'.f-mpn','sensor':'.f-sensor','battery':'.f-battery','not-sealed':'.f-sealed','msl4+':'.f-msl','fuzzy-stock':'.f-fuzzystock'};
   Object.entries(counts).forEach(([k,v]) => {
     if (k === 'all') return;
     const btn = document.querySelector('.filter-btn' + (filterMap[k]||''));
@@ -1752,7 +2026,7 @@ function updateFilterCounts() {
   });
 
   // Show filter bar only if there's something to filter
-  const hasIssues = counts.error > 0 || counts.warn > 0 || counts.mpn > 0;
+  const hasIssues = counts.error > 0 || counts.warn > 0 || counts.mpn > 0 || counts['fuzzy-stock'] > 0;
   document.getElementById('filter-bar').style.display = hasIssues ? 'flex' : 'none';
 }
 // ---- END FILTER SYSTEM ----
@@ -1780,10 +2054,8 @@ function exportCSV() {
   const headers0 = Object.keys(bomData[0]);
   const recusKey = headers0.find(k => k.toLowerCase().includes('reçus') || k.toLowerCase().includes('recus'));
   const stockColKey = recusKey || 'Stock';
-  bomData.forEach(row => {
-    const ipn = (row['Approved internal part number']||row['IPN']||row['ipn']||'').trim().toUpperCase();
-    const mpn = (row['MPN']||row['mpn']||'').trim().toUpperCase();
-    const si = getStockInfo(ipn, mpn, row['Manufacturer free']||'');
+  bomData.forEach((row, i) => {
+    const si = resolveStockQty(row, i);
     row[stockColKey] = si.qty !== null ? String(si.qty) : '';
   });
 
@@ -1952,11 +2224,11 @@ async function writeToGSheet() {
     }
   });
 
-  // Stock : cible explicitement la clé canonique 'Reçus'
-  bomData.forEach(row => {
-    const ipn = (row['Approved internal part number']||row['IPN']||row['ipn']||'').trim().toUpperCase();
-    const mpn = (row['MPN']||row['mpn']||'').trim().toUpperCase();
-    const si = getStockInfo(ipn, mpn, row['Manufacturer free']||'');
+  // Stock : cible explicitement la clé canonique 'Reçus'. resolveStockQty respecte les
+  // matchs flous adoptés manuellement et les lignes suppressées par une scission de stock
+  // partiel (leur vrai chiffre de stock ne doit pas être ré-écrit ici).
+  bomData.forEach((row, i) => {
+    const si = resolveStockQty(row, i);
     row['Reçus'] = si.qty !== null ? String(si.qty) : '';
   });
 
@@ -1975,11 +2247,6 @@ async function writeToGSheet() {
     'MOQ','Package','Unit price','Purchase qty','Purchase price','MPN','Designator','Approved parts',
     'Mounting','Notes','Manufacturer free','Reçus','Manquant','Stock PP'
   ];
-  function getColValue(row, colName) {
-    if (row[colName] !== undefined) return row[colName];
-    const found = Object.keys(row).find(k => k.toLowerCase().trim() === colName.toLowerCase().trim());
-    return found ? row[found] : '';
-  }
   const headers = ACHATS_COLUMNS;
   const rowsPayload = bomData.map(r => {
     const obj = {};
@@ -2120,7 +2387,7 @@ function clearBOM() {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: var(--text);
+  background: var(--blue);
   color: white;
   border: none;
   cursor: pointer;
@@ -2137,7 +2404,7 @@ function clearBOM() {
   position: absolute;
   top: -2px; right: -2px;
   width: 14px; height: 14px;
-  background: #993556;
+  background: var(--pink-badge);
   border-radius: 50%;
   border: 2px solid white;
   display: none;
@@ -2185,7 +2452,7 @@ function clearBOM() {
   padding: 2px 7px;
   border-radius: 20px;
   background: var(--green-bg);
-  color: var(--green);
+  color: var(--green-badge);
   font-weight: 500;
 }
 .chat-context-badge.empty {
@@ -2230,7 +2497,7 @@ function clearBOM() {
   word-break: break-word;
 }
 .chat-msg.user .chat-bubble {
-  background: var(--text);
+  background: var(--blue);
   color: white;
   border-bottom-right-radius: 4px;
 }
@@ -2298,12 +2565,12 @@ function clearBOM() {
   line-height: 1.5;
   outline: none;
 }
-.chat-input:focus { border-color: var(--text); }
+.chat-input:focus { border-color: var(--blue); }
 .chat-send {
   width: 34px;
   height: 34px;
   border-radius: var(--radius);
-  background: var(--text);
+  background: var(--blue);
   color: white;
   border: none;
   cursor: pointer;
