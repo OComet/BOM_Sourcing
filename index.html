@@ -2342,11 +2342,12 @@ async function writeToGSheet() {
     row['Reçus'] = si.qty !== null ? String(si.qty) : '';
   });
 
-  // Injecter dans la colonne Notes : points de vigilance qualité (Gemini + catégories Claude),
-  // warnings capteur/batterie/non-étanche/MSL (jusqu'ici présents dans l'export XLS via un rapport
-  // séparé, mais absents de l'écriture GSheet — retour terrain du 23/07), et annotations stock
-  // (scission stock partiel / match flou adopté), pour que le magasinier ait toute l'info en un
-  // seul endroit sur la ligne concernée.
+  // Colonne dédiée "Vigilance" : points de vigilance qualité (Gemini + catégories Claude), warnings
+  // capteur/batterie/non-étanche/MSL (jusqu'ici présents dans l'export XLS via un rapport séparé,
+  // mais absents de l'écriture GSheet — retour terrain du 23/07), et annotations stock (scission
+  // stock partiel / match flou adopté). La colonne 'Notes' d'origine (import Luminovo) n'est plus
+  // jamais réécrite — elle remonte telle quelle, le texte de vigilance était trop long pour y tenir
+  // lisiblement (retour terrain du 23/07).
   const WARNING_LABELS = {
     sensor: 'Capteur (pression/humidité/température)',
     battery: 'Pile / batterie',
@@ -2359,17 +2360,17 @@ async function writeToGSheet() {
     (meta.qc_issues || []).forEach(q => lines.push('• ' + q));
     (meta.warnings || []).forEach(w => lines.push('• ⚠ ' + (WARNING_LABELS[w] || w)));
     if (meta.stockNote) lines.push('• ' + meta.stockNote);
-    row['Notes'] = lines.join('\n');
+    row['Vigilance'] = lines.join('\n');
   });
 
-  // 19 colonnes A→S envoyées PAR NOM (objets, pas tableaux positionnels) — le pipeline N8N
+  // 20 colonnes A→T envoyées PAR NOM (objets, pas tableaux positionnels) — le pipeline N8N
   // (Split Out + nœuds Code) lit ces valeurs via rows[i][nomColonne], indépendamment de
   // l'ordre JS. Ne pas revenir à un format de tableau positionnel : c'était le format attendu
   // par l'ancien writer Apps Script, plus par le webhook N8N.
   const ACHATS_COLUMNS = [
     'Supplier','Supplier part number','Approved internal part number','Aggregated qty','Scrap qty',
     'MOQ','Package','Unit price','Purchase qty','Purchase price','MPN','Designator','Approved parts',
-    'Mounting','Notes','Manufacturer free','Reçus','Manquant','Stock PP'
+    'Mounting','Notes','Manufacturer free','Reçus','Manquant','Stock PP','Vigilance'
   ];
   const headers = ACHATS_COLUMNS;
   const rowsPayload = bomData.map(r => {
@@ -2377,6 +2378,7 @@ async function writeToGSheet() {
     ACHATS_COLUMNS.forEach(c => { obj[c] = String(getColValue(r, c) || ''); });
     return obj;
   });
+
 
   // Build warnings summary from rowMeta
   const warningsSummary = { sensor:[], battery:[], 'not-sealed':[], 'msl4+':[], error:[], uncodified:[] };
